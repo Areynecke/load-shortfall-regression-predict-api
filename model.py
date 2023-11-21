@@ -58,7 +58,40 @@ def _preprocess_data(data):
     # ---------------------------------------------------------------
 
     # ----------- Replace this code with your own preprocessing steps --------
-    predict_vector = feature_vector_df[['Madrid_wind_speed','Bilbao_rain_1h','Valencia_wind_speed']]
+    #Just being lazy=
+    train_df= feature_vector_df
+    
+    #Creating a copy
+    copy_train_df = train_df.copy()
+    
+    # remove missing values and replacing it with a mean value. As we identified in section 3 Exploratory Data Analysis (EDA)
+    copy_train_df['Valencia_pressure'].fillna(copy_train_df['Valencia_pressure'].mean(), inplace = True)
+    
+    # In the following step I am extracting the two object lines as 'int64' and confirming its succesfully done afterwards
+    copy_train_df['Valencia_wind_deg'] = copy_train_df['Valencia_wind_deg'].astype(str).str.extract('(\d+)').astype('float64')
+    copy_train_df['Seville_pressure'] = copy_train_df['Seville_pressure'].astype(str).str.extract('(\d+)').astype('float64')
+
+    #Engineering New Features, breaking up the time column into a manageable structure adding columns of the year, month, week, hour
+    copy_train_df['Year']  = copy_train_df['time'].astype('datetime64[ns]').dt.year
+    copy_train_df['Month']  = copy_train_df['time'].astype('datetime64[ns]').dt.month
+    copy_train_df['Week'] = copy_train_df['time'].astype('datetime64[ns]').dt.weekday
+    copy_train_df['Day']  = copy_train_df['time'].astype('datetime64[ns]').dt.day
+    copy_train_df['Hour']  = copy_train_df['time'].astype('datetime64[ns]').dt.hour
+
+    #dropping the unuseable columns, confirming its was done successfully
+    copy_train_df = copy_train_df.drop(columns=['Unnamed: 0','time'])
+
+    predict_vector = feature_vector_df[['Madrid_wind_speed', 'Valencia_wind_deg', 'Bilbao_rain_1h',
+       'Valencia_wind_speed', 'Seville_humidity', 'Madrid_humidity',
+       'Bilbao_clouds_all', 'Bilbao_wind_speed', 'Seville_clouds_all',
+       'Bilbao_wind_deg', 'Barcelona_wind_speed', 'Barcelona_wind_deg',
+       'Madrid_clouds_all', 'Seville_wind_speed', 'Barcelona_rain_1h',
+       'Seville_pressure', 'Seville_rain_1h', 'Bilbao_snow_3h',
+       'Barcelona_pressure', 'Seville_rain_3h', 'Madrid_rain_1h',
+       'Barcelona_rain_3h', 'Valencia_snow_3h', 'Madrid_weather_id',
+       'Barcelona_weather_id', 'Bilbao_pressure', 'Seville_weather_id',
+       'Valencia_pressure', 'Seville_temp_max', 'Bilbao_weather_id', 
+        'Valencia_humidity', 'Year', 'Month', 'Week', 'Day', 'Hour']]
     # ------------------------------------------------------------------------
 
     return predict_vector
